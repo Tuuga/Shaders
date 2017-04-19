@@ -33,7 +33,7 @@
 
 			Interpolators MyVertexProgram (VertexData v) {
 				Interpolators i;
-				i.position = mul(UNITY_MATRIX_MVP, v.position);
+				i.position = UnityObjectToClipPos(v.position);
 				i.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				i.uvDetail = TRANSFORM_TEX(v.uv, _DetailTex);
 				return i;
