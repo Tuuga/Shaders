@@ -1,4 +1,4 @@
-﻿Shader "Custon/Texture Splatting" {
+﻿Shader "Custom/Texture Splatting" {
 
 	Properties {
 		_MainTex ("Splat Map", 2D) = "white" {}

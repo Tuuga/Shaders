@@ -1,4 +1,4 @@
-﻿Shader "Custon/My First Shader" {
+﻿Shader "Custom/My First Shader" {
 
 	Properties {
 		_Tint("Tint", Color) = (1, 1, 1, 1)

@@ -1,4 +1,4 @@
-﻿Shader "Custon/Textured With Detail" {
+﻿Shader "Custom/Textured With Detail" {
 
 	Properties {
 		_Tint("Tint", Color) = (1, 1, 1, 1)
