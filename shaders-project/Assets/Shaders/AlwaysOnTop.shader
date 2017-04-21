@@ -1,15 +1,58 @@
 ﻿Shader "Custom/AlwaysOnTop" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
+		_OverlapColor("Overlap Color", Color) = (1, 1, 1, 1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_OverlapTex ("Overlap Texture", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
 	SubShader {
+
+		Pass {
+
+			ZTest Always
+			ZWrite Off
+
+			CGPROGRAM
+
+			#pragma vertex MyVertexProgram
+			#pragma fragment MyFragmentProgram
+
+			#include "UnityCG.cginc"
+
+			float4 _OverlapColor;
+			sampler2D _OverlapTex;
+			float4 _OverlapTex_ST;
+			
+			struct Interpolators {
+				float4 position : SV_POSITION;
+				float2 uv : TEXCOORD0;
+			};
+
+			struct VertexData {
+				float4 position : POSITION;
+				float2 uv : TEXCOORD0;
+			};
+
+			Interpolators MyVertexProgram (VertexData v) {
+				Interpolators i;
+				i.position = UnityObjectToClipPos(v.position);
+				i.uv = TRANSFORM_TEX(v.uv, _OverlapTex);
+				return i;
+			}
+
+			float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
+				return tex2D (_OverlapTex, i.uv) * _OverlapColor;
+			}
+
+			ENDCG
+		}
+
+
 		Tags { "RenderType"="Opaque" }
 		LOD 200
-		ZTest Always
-		ZWrite Off
+		
 
 		
 		CGPROGRAM
