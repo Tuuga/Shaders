@@ -69,14 +69,7 @@ public class PlayerLineOfSight : MonoBehaviour {
 			if (hit.collider.GetComponent<Obstacle>() == obst) {
 				info = HitInfo.Left;
 			}
-		}		
-		
-		// DEBUG
-		//if (info == HitInfo.Left) {
-		//	Debug.DrawLine(origin, origin + left * (dist + distPad), Color.red);
-		//} else {
-		//	Debug.DrawLine(origin, origin + left * (dist + distPad), Color.green);
-		//}
+		}
 
 		hits = new List<RaycastHit>(Physics.RaycastAll(origin, right, dist + distPad, mask));
 		foreach (RaycastHit hit in hits) {
@@ -88,13 +81,6 @@ public class PlayerLineOfSight : MonoBehaviour {
 				}
 			}
 		}
-
-		// DEBUG
-		//if (info == HitInfo.Right || info == HitInfo.Both) {
-		//	Debug.DrawLine(origin, origin + right * (dist + distPad), Color.red);
-		//} else {
-		//	Debug.DrawLine(origin, origin + right * (dist + distPad), Color.green);
-		//}
 
 		return new VertexInfo(info, dir);
 	}
