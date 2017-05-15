@@ -21,9 +21,9 @@ public class Obstacle : MonoBehaviour {
 			var tempVert = v;
 			if (!verts.Contains(tempVert)) {
 				if (!ContainsYExcluded(verts2D, tempVert)) {
-					var visual = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-					visual.transform.localScale = Vector3.one * 0.1f;
-					visuals.Add(visual.transform);
+					//var visual = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+					//visual.transform.localScale = Vector3.one * 0.1f;
+					//visuals.Add(visual.transform);
 					verts2D.Add(new Vector3(tempVert.x, 0, tempVert.z));
 				}
 				verts.Add(tempVert);
@@ -31,13 +31,13 @@ public class Obstacle : MonoBehaviour {
 		}
 	}
 
-	void Update () {
-		for (int i = 0; i < verts2D.Count; i++) {
-			var vertWorld = GetWorldPos(verts2D[i]);
-			vertWorld.y = 0;
-			visuals[i].position = vertWorld;
-		}
-	}
+	//void Update () {
+	//	for (int i = 0; i < verts2D.Count; i++) {
+	//		var vertWorld = GetWorldPos(verts2D[i]);
+	//		vertWorld.y = 0;
+	//		visuals[i].position = vertWorld;
+	//	}
+	//}
 
 	Vector3 GetWorldPos (Vector3 v) {
 		var result = v;

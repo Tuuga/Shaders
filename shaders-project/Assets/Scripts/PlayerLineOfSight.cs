@@ -1,125 +1,94 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerLineOfSight : MonoBehaviour {
-
-	enum HitInfo { None, Left, Right, Both }
-
-	struct VertexInfo {
-		public HitInfo hitInfo;
-		public Vector3 dirFromPlayer;
+	struct HitPoint {
 		public Vector3 point;
+		public float angle;
 
-		public VertexInfo (HitInfo hitInfo, Vector3 dirFromPlayer, Vector3 point) {
-			this.hitInfo = hitInfo;
-			this.dirFromPlayer = dirFromPlayer;
+		public HitPoint (Vector3 point, float angle) {
 			this.point = point;
+			this.angle = angle;
 		}
 	}
 
 	public LayerMask mask;
 	public Material shadowMat;
-	public float forkAngle;
-	public float distPad;
-	public float shadowRadius;
+	public float offsetAngle;
+	public bool debugDraw;
+
+	public List<int> indices;
 
 	List<Obstacle> obstacles;
-	List<GameObject> shadows = new List<GameObject>();
 
 	void Start () {
 		obstacles = new List<Obstacle>(FindObjectsOfType<Obstacle>());
 	}
-	
+
 	void Update () {
-		
-		//foreach (Obstacle o in obstacles) {
-		//	var verts = o.GetWorld2DVerts();
-		//	var quadVerts = new Vector3[4];
-		//	foreach (Vector3 v in verts) {
-		//		var hit = DoubleCast(transform.position, v, o);
-		//		if (hit.hitInfo == HitInfo.Left) {
-		//			quadVerts[0] = v;
-		//			quadVerts[3] = transform.position + hit.dirFromPlayer * shadowRadius;
-		//		}
-		//		if (hit.hitInfo == HitInfo.Right) {
-		//			quadVerts[1] = v;
-		//			quadVerts[2] = transform.position + hit.dirFromPlayer * shadowRadius;
-		//		}
-		//	}
-		//	GenerateQuad(quadVerts);
-		//}
-		
-
-		//var triVerts = new List<Vector3>();
-		//foreach (Obstacle o in obstacles) {
-		//	var verts = o.GetWorld2DVerts();
-		//	foreach (Vector3 v in verts) {
-		//		var dir = (v - transform.position).normalized;
-		//		RaycastHit hit;
-		//		Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, mask);
-
-		//		if (hit.point == v) {
-		//			Debug.DrawLine(transform.position, hit.point, Color.green);
-		//			triVerts.Add(v);
-		//			if (triVerts.Count == 2) {
-		//				GenerateTriabgle(new Vector3[] { transform.position, triVerts[0], triVerts[1] });
-		//				triVerts = new List<Vector3>();
-		//			}
-		//		} else {
-		//			Debug.DrawLine(transform.position, hit.point, Color.red);
-		//		}
-		//	}
-		//}
-	}
-
-	VertexInfo DoubleCast (Vector3 origin, Vector3 end, Obstacle obst) {
-		HitInfo info = HitInfo.None;
-		var dir = (end - origin).normalized;
-		var dist = (end - origin).magnitude;
-		var hitPoint = new Vector3();
-
-		var left = Quaternion.AngleAxis(forkAngle / 2, Vector3.up) * dir;
-		var right = Quaternion.AngleAxis(-forkAngle / 2, Vector3.up) * dir;
-
-		var hits = new List<RaycastHit>(Physics.RaycastAll(origin, left, dist + distPad, mask));
-		foreach (RaycastHit hit in hits) {
-			if (hit.collider.GetComponent<Obstacle>() == obst) {
-				hitPoint = hit.point;
-				info = HitInfo.Left;
+		var hitPoints = new List<HitPoint>();
+		foreach (Obstacle o in obstacles) {
+			var verts = o.GetWorld2DVerts();
+			foreach (Vector3 v in verts) {
+				hitPoints.Add((GetHitPoint(transform.position, v, 0)));
+				hitPoints.Add((GetHitPoint(transform.position, v, offsetAngle)));
+				hitPoints.Add((GetHitPoint(transform.position, v, -offsetAngle)));
 			}
 		}
 
-		hits = new List<RaycastHit>(Physics.RaycastAll(origin, right, dist + distPad, mask));
-		foreach (RaycastHit hit in hits) {
-			if (hit.collider.GetComponent<Obstacle>() == obst) {
-				hitPoint = hit.point;
-				if (info == HitInfo.Left) {
-					info = HitInfo.Both;
-				} else {
-					info = HitInfo.Right;
-				}
+		hitPoints.Sort((x, y) => x.angle.CompareTo(y.angle));
+		hitPoints.Reverse();
+
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			foreach (HitPoint h in hitPoints) {
+				print(h.angle);
 			}
 		}
 
-		return new VertexInfo(info, dir, hitPoint);
-	}
+		var vertices = new List<Vector3>();
+		vertices.Add(transform.position);
+		foreach (HitPoint h in hitPoints) {
+			vertices.Add(h.point);
+			if (debugDraw) {
+				Debug.DrawLine(transform.position + Vector3.up, h.point + Vector3.up, Color.red);
+			}
+		}
 
-	void GenerateQuad (Vector3[] vertices) {
+		indices = new List<int>();
+		int index = 0;
+		while (index + 2 < vertices.Count) {
+			indices.Add(0);
+			indices.Add(index + 1);
+			indices.Add(index + 2);
+			index++;
+		}
+		// Connect last and first
+		indices.Add(0);
+		indices.Add(vertices.Count - 1);
+		indices.Add(1);
+
 		var mesh = new Mesh();
-		mesh.vertices = vertices;
-		mesh.triangles = new int[] { 2, 1, 0, 2, 0, 3 };
+		mesh.vertices = vertices.ToArray();
+		mesh.triangles = indices.ToArray();
 		mesh.RecalculateBounds();
 		mesh.RecalculateNormals();
 		Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, shadowMat, 0);
 	}
 
-	void GenerateTriangle (Vector3[] vertices) {
-		var mesh = new Mesh();
-		mesh.vertices = vertices;
-		mesh.triangles = new int[] { 0, 1, 2 };
-		mesh.RecalculateBounds();
-		mesh.RecalculateNormals();
-		Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, shadowMat, 0);
+	HitPoint GetHitPoint (Vector3 origin, Vector3 towards, float offsetAngle) {
+		var dir = (towards - origin).normalized;
+		dir = Quaternion.AngleAxis(offsetAngle, Vector3.up) * dir;
+
+		RaycastHit hit;
+		if (Physics.Raycast(origin, dir, out hit, Mathf.Infinity, mask)) {
+			float angle = Mathf.Atan2(hit.point.z - origin.z, hit.point.x - origin.x) * Mathf.Rad2Deg;
+			return new HitPoint(hit.point, angle);
+		} else {
+			var point = dir * 100;
+			float angle = Mathf.Atan2(point.z - origin.z, point.x - origin.x) * Mathf.Rad2Deg;
+			return new HitPoint(point, angle);
+		}
 	}
 }
