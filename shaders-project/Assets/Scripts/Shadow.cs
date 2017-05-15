@@ -14,10 +14,7 @@ public class Shadow : MonoBehaviour {
 	List<Transform> visuals = new List<Transform>();
 
 	MeshFilter obsFilter;
-
-	//[Tooltip("DEBUG")]
-	//public Vector2 playerUVPos;
-
+	
 	Material mat;
 
 	void Awake () {
