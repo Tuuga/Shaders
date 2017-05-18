@@ -7,7 +7,7 @@ public class Obstacle : MonoBehaviour {
 	List<Vector3> verts = new List<Vector3>();
 	List<Vector3> verts2D = new List<Vector3>();
 
-	List<Transform> visuals = new List<Transform>();
+	//List<Transform> visuals = new List<Transform>();
 
 	MeshFilter filter;
 
@@ -16,17 +16,16 @@ public class Obstacle : MonoBehaviour {
 	}
 
 	void Start () {
-		var tempVerts = filter.mesh.vertices;
-		foreach (Vector3 v in tempVerts) {
-			var tempVert = v;
-			if (!verts.Contains(tempVert)) {
-				if (!ContainsYExcluded(verts2D, tempVert)) {
+		var meshVerts = filter.mesh.vertices;
+		foreach (Vector3 v in meshVerts) {
+			if (!verts.Contains(v)) {
+				if (!ContainsYExcluded(verts2D, v)) {
 					//var visual = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 					//visual.transform.localScale = Vector3.one * 0.1f;
 					//visuals.Add(visual.transform);
-					verts2D.Add(new Vector3(tempVert.x, 0, tempVert.z));
+					verts2D.Add(new Vector3(v.x, 0, v.z));
 				}
-				verts.Add(tempVert);
+				verts.Add(v);
 			}
 		}
 	}
