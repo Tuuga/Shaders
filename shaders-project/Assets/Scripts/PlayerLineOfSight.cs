@@ -17,8 +17,12 @@ public class PlayerLineOfSight : MonoBehaviour {
 	public LayerMask mask;
 	public Material losMat;
 	public float offsetAngle;
+	public float worldScale;
+	public float u;
 
-	public List<int> inds;
+	public List<int> debugInds;
+	public List<Vector3> debugVerts;
+	public List<Vector2> debugUV;
 
 	List<Obstacle> obstacles;
 	public Mesh mesh;
@@ -34,8 +38,12 @@ public class PlayerLineOfSight : MonoBehaviour {
 		var hitPoints = GetHitPoints(allVerts);
 		var vertices = GetVertices(hitPoints);
 		var indices = GetIndices(vertices);
-		inds = indices;
-		var uv = GetUV(vertices);
+		var uv = GetGradientUV(vertices);
+
+		debugVerts = vertices;
+		debugInds = indices;
+		debugUV = uv;
+
 		GenerateMesh(vertices.ToArray(), indices.ToArray(), uv.ToArray(), mesh, losMat);    // Generate the los mesh
 	}
 
@@ -115,33 +123,31 @@ public class PlayerLineOfSight : MonoBehaviour {
 		return vertices;
 	}
 
-	List<Vector2> GetUV (List<Vector3> verts) {
+	List<Vector2> GetGlobalUV (List<Vector3> verts) {
 		var uvs = new List<Vector2>();
-		for (int i = 0; i < verts.Count - 3; i += 3) {
 
-			Debug.DrawLine(verts[0], verts[i + 1], Color.red);
-			Debug.DrawLine(verts[0], verts[i + 2], Color.red);
-			Debug.DrawLine(verts[i + 1], verts[i + 2], Color.red);
-
-			var p0p1 = Vector3.Distance(verts[0], verts[i + 1]);
-			var p0p2 = Vector3.Distance(verts[0], verts[i + 2]);
-			var p1p2 = Vector3.Distance(verts[i + 1], verts[i + 2]);
-
-			uvs.Add(new Vector2(0, 0));
-			uvs.Add(new Vector2(p0p1, 0));
-			uvs.Add(new Vector2(p0p2, p1p2));
+		//uvs.Add(new Vector2(0, 0));
+		for (int i = 0; i < verts.Count; i++) {
+			var pos = verts[i];
+			var uv = new Vector2();
+			uv.x = (pos.x + worldScale / 2) / worldScale;
+			uv.y = (pos.z + worldScale / 2) / worldScale;
+			uvs.Add(uv);
 		}
+		return uvs;
+	}
 
-		var firstToLast = Vector3.Distance(verts[0], verts[verts.Count - 1]);
-		var secondLastToLast = Vector3.Distance(verts[verts.Count - 2], verts[verts.Count - 1]);
-		uvs.Add(new Vector2(firstToLast, secondLastToLast));
+	List<Vector2> GetGradientUV (List<Vector3> verts) {
+		var uvs = new List<Vector2>();
 
-		//foreach (Vector3 v in verts) {
-		//	var uv = Camera.main.WorldToScreenPoint(v);
-		//	uv.x = uv.x / Screen.width;
-		//	uv.y = uv.y / Screen.height;
-		//	uvs.Add(uv);
-		//}
+		//uvs.Add(new Vector2(0, 0));
+		for (int i = 0; i < verts.Count; i++) {
+			var pos = verts[i];
+			var uv = new Vector2();
+			uv.x = u;
+			uv.y = Vector3.Distance(transform.position, pos) / worldScale;
+			uvs.Add(uv);
+		}
 		return uvs;
 	}
 
