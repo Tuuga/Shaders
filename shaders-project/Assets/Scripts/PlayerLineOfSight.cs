@@ -38,7 +38,7 @@ public class PlayerLineOfSight : MonoBehaviour {
 		var hitPoints = GetHitPoints(allVerts);
 		var vertices = GetVertices(hitPoints);
 		var indices = GetIndices(vertices);
-		var uv = GetGradientUV(vertices);
+		var uv = GetGlobalUV(vertices);
 
 		debugVerts = vertices;
 		debugInds = indices;
@@ -126,12 +126,11 @@ public class PlayerLineOfSight : MonoBehaviour {
 	List<Vector2> GetGlobalUV (List<Vector3> verts) {
 		var uvs = new List<Vector2>();
 
-		//uvs.Add(new Vector2(0, 0));
 		for (int i = 0; i < verts.Count; i++) {
 			var pos = verts[i];
 			var uv = new Vector2();
-			uv.x = (pos.x + worldScale / 2) / worldScale;
-			uv.y = (pos.z + worldScale / 2) / worldScale;
+			uv.x = (pos.x - transform.position.x + worldScale / 2) / worldScale;
+			uv.y = (pos.z - transform.position.z + worldScale / 2) / worldScale;
 			uvs.Add(uv);
 		}
 		return uvs;
