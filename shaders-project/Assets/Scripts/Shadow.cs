@@ -14,10 +14,6 @@ public class Shadow : MonoBehaviour {
 	}
 
 	void OnRenderImage (RenderTexture source, RenderTexture destination) {
-
-		//var pScreenPos = Camera.main.WorldToScreenPoint(player.position);
-		//playerUVPos = new Vector2(pScreenPos.x / Camera.main.pixelWidth, pScreenPos.y / Camera.main.pixelHeight);
-
 		mat.SetTexture("_MainTex", source);
 		mat.SetColor("_SecondTex", color);
 		mat.SetFloat("_t", color.a);

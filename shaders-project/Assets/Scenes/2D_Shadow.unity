@@ -1008,7 +1008,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f28114f28fd06cb4faa855eccbd7adac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shader: {fileID: 4800000, guid: 916ed8d701c973747a9fd969b739cce6, type: 3}
+  shader: {fileID: 4800000, guid: add9c4f1b87668943b4bb58318db0dff, type: 3}
   color: {r: 1, g: 1, b: 1, a: 0}
 --- !u!1 &814857841
 GameObject:
